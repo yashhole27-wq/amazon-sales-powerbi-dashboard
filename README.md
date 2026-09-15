@@ -1,98 +1,153 @@
 # Amazon E-Commerce Business Intelligence Dashboard
 
-An interactive Power BI dashboard analyzing 128,949 Amazon India apparel orders (Q2 2022) to surface revenue trends, product performance, geographic demand, and order fulfillment health.
+An interactive **Microsoft Power BI dashboard** analyzing Amazon India apparel sales to uncover revenue trends, product performance, geographic demand, fulfillment patterns, and cancellation behavior.
 
-![Dashboard Preview](page-1-overview.png)
+## 📊 Dashboard Preview
 
-## Business Problem
+![Amazon Power BI Dashboard](screenshots/page-1-overview.png)
 
-An Amazon third-party seller needed visibility into three questions their raw order exports couldn't answer directly:
-1. Where is revenue actually coming from — which categories, states, and fulfillment channels drive the business?
-2. How much revenue is being lost to cancellations and returns, and does that vary by product category?
-3. Is the business more B2B or B2C, and does that split matter for revenue?
+**Dashboard pages:**
 
-## Key Insights
+* Executive Overview
+* Geography Analysis
+* Product Performance
+* Fulfillment & Cancellations
 
-- Net revenue across the quarter: ₹70,261,362 (~₹7.03 crore) across 120,352 orders
-- Cancellation rate: 14.3% overall — kurta, Set, and Saree show the highest cancellation rates among categories (~14.6% each), suggesting cancellations aren't concentrated in one product line but spread fairly evenly across top sellers
-- Top state by revenue: Maharashtra, accounting for ~17.2% of total revenue (₹1.2 crore), followed by Karnataka and Telangana
-- B2B orders represent only 0.79% of revenue despite being 0.66% of order volume — this business is almost entirely B2C (99.2%+), so B2B-specific strategies would affect a negligible share of revenue
-
-## Dashboard Pages
-
-| Page | What it shows |
-|---|---|
-| **Executive Overview** | Headline KPIs (net revenue, orders, AOV, cancellation rate), revenue trend, category and fulfillment breakdown |
-| **Geography** | Revenue by state on a map of India, top states/cities table |
-| **Product Performance** | Revenue and units by category, category × size matrix, value-vs-volume scatter |
-| **Fulfillment & Cancellations** | Order status breakdown, cancellation rate by category, B2B vs B2C split |
-
-## Data
-
-- **Source**: [Amazon Sale Report — Kaggle](https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data) (public dataset, India apparel seller, Mar 31–Jun 29 2022)
-- **`/data/sample_sales_data.csv`** — a 2,000-row representative sample of the cleaned fact table, included here so the repo stays lightweight. The full 128,949-row cleaned dataset (~68MB) isn't committed directly; download the original from the Kaggle link above and run the cleaning steps below to reproduce it.
-- **`/data/Dim_Date.csv`** — a standalone date dimension table built for proper time-intelligence support in the model (91 days, Mar 31–Jun 29 2022).
-
-## Data Model
-
-Built as a star schema rather than a single flat table:
-
-```
-Dim_Date (1) ──────< (many) Amazon_Sales_Fact
-   Date                        Date
-   Year                        Order ID, Status, Category, Amount, Qty, ...
-   Month Name
-   Quarter
-   Is Weekend
-```
-
-`Dim_Date` is marked as an official Date Table in Power BI, enabling proper MTD/rolling/period-over-period DAX.
-
-## Data Cleaning
-
-Starting from the raw export, the following cleaning steps were applied (see `/dax/DAX_Measures.md` for the full reasoning):
-
-- Dropped an empty trailing column (`Unnamed: 22`)
-- Standardized `Ship State` / `Ship City` casing (raw data mixed ALL CAPS and Title Case, which breaks map visuals and groupings)
-- Added an `Is Valid Order` flag distinguishing cancelled/returned orders from fulfilled ones, so headline revenue metrics aren't inflated by cancelled transactions — while keeping those rows in the model for cancellation analysis
-- Verified column data types (Date, Decimal, Whole Number, True/False) before loading into the model
-
-## DAX Measures
-
-~15 measures covering revenue, orders, cancellation/delivery rates, time intelligence, and B2B/B2C splits. Full list with explanations in [`/dax/DAX_Measures.md`](dax/DAX_Measures.md).
-
-Notable design decisions:
-- **`Total Orders` uses `DISTINCTCOUNT(Order ID)`**, not row count — ~8,600 rows in the raw data share an Order ID because of multi-SKU orders, so a naive row count would overcount orders by ~7%.
-- **`Net Revenue` filters on `Is Valid Order`** instead of deleting cancelled rows from the dataset, preserving the ability to analyze cancellations as their own metric rather than hiding that signal.
-
-## Tools Used
-
-- **Power BI Desktop** — data modeling, DAX, report design
-- **Power Query** — data type correction and load
-- **Python (pandas)** — initial data cleaning and star-schema prep (see `/data`)
-
-## How to Reproduce
-
-1. Download the raw dataset from the Kaggle link above.
-2. Open `Amazon_BI_Dashboard.pbix` in Power BI Desktop (or rebuild using the steps in [`/docs/Report_Build_Guide.md`](docs/Report_Build_Guide.md)).
-3. Point the data source to your downloaded CSV, or use `/data/sample_sales_data.csv` for a quick preview with a smaller dataset.
-
-## Repo Structure
-
-```
-├── README.md
-├── Amazon_BI_Dashboard.pbix       # (add once built)
-├── data/
-│   ├── sample_sales_data.csv      # 2,000-row sample of the cleaned fact table
-│   └── Dim_Date.csv               # date dimension table
-├── dax/
-│   └── DAX_Measures.md            # all measures + design reasoning
-├── docs/
-│   └── Report_Build_Guide.md      # full page-by-page build guide
-└── screenshots/
-    └── (dashboard page screenshots)
-```
+See all dashboard screenshots in the [`screenshots`](screenshots/) folder.
 
 ---
 
-*Built as part of a Data Analyst portfolio project by Yash Sachin Hole.*
+## 🎯 Business Problem
+
+The objective of this project was to transform raw Amazon e-commerce order data into an interactive business intelligence dashboard that helps answer:
+
+1. Which categories and locations generate the most revenue?
+2. What are the major product and fulfillment trends?
+3. How significant are cancellations?
+4. How does B2B performance compare with B2C?
+5. Which states and cities represent the strongest demand?
+
+---
+
+## 🔍 Key Insights
+
+* **Net Revenue:** ₹70,261,362 (~₹7.03 crore)
+* **Orders:** 120,352
+* **Overall Cancellation Rate:** ~14.3%
+* **Top Revenue State:** Maharashtra
+* **Business Mix:** Predominantly B2C
+* Cancellation rates are distributed across major product categories rather than being concentrated in a single category.
+
+---
+
+## 📑 Dashboard Pages
+
+| Page                            | Description                                                          |
+| ------------------------------- | -------------------------------------------------------------------- |
+| **Executive Overview**          | KPIs, revenue trends, category performance, and fulfillment overview |
+| **Geography**                   | Revenue distribution across Indian states and cities                 |
+| **Product Performance**         | Category revenue, units, size analysis, and product performance      |
+| **Fulfillment & Cancellations** | Order status, cancellation analysis, and B2B vs B2C comparison       |
+
+---
+
+## 🗂️ Data
+
+**Source:** Amazon Sale Report — public Kaggle dataset.
+
+The project uses Amazon India apparel order data covering approximately **128,949 records** from March 31 to June 29, 2022.
+
+### Repository data
+
+* [`sample_sales_data.csv`](data/sample_sales_data.csv) — representative cleaned sample of the sales fact table.
+* [`Dim_Date.csv`](data/Dim_Date.csv) — date dimension used for time-based analysis.
+
+The full cleaned dataset is not included in the repository to keep the repository lightweight.
+
+---
+
+## 🧹 Data Cleaning
+
+The raw dataset was prepared before loading into Power BI.
+
+Key cleaning steps included:
+
+* Removed the empty trailing column.
+* Standardized `Ship State` and `Ship City` values.
+* Corrected data types.
+* Created an `Is Valid Order` flag.
+* Preserved cancelled transactions for cancellation analysis.
+* Prepared a dedicated date dimension for time intelligence.
+
+---
+
+## 🧩 Data Model
+
+The dashboard uses a **star-schema approach** with a dedicated date dimension.
+
+```text
+Dim_Date (1) ──────────< (Many) Amazon_Sales_Fact
+
+   Date                         Date
+   Year                         Order ID
+   Month Name                   Status
+   Quarter                      Category
+   Is Weekend                   Amount
+                                Qty
+                                ...
+```
+
+The date dimension supports time-intelligence calculations and period-based analysis.
+
+---
+
+## 🧮 DAX Measures
+
+The project contains approximately **15 DAX measures** covering:
+
+* Revenue
+* Total Orders
+* Average Order Value
+* Cancellation Rate
+* Delivery Rate
+* Time Intelligence
+* B2B vs B2C analysis
+
+Full DAX documentation is available in [`DAX_Measures.md`](dax/DAX_Measures.md).
+
+### Important DAX design decisions
+
+**Total Orders**
+
+Uses `DISTINCTCOUNT(Order ID)` rather than counting rows because a single order can contain multiple products or SKUs.
+
+**Net Revenue**
+
+Uses the `Is Valid Order` flag so cancelled transactions can be excluded from revenue while still remaining available for cancellation analysis.
+
+---
+
+## 🛠️ Tools & Technologies
+
+* **Microsoft Power BI Desktop**
+* **Power Query**
+* **DAX**
+* **Python**
+* **Pandas**
+* **CSV**
+* **GitHub**
+
+---
+
+## 📁 Repository Structure
+
+```text
+amazon-sales-powerbi-dashboard/
+│
+├── README.md
+├── Amazon_BI_Dashboard.pbix
+│
+├── data/
+│   ├── sample_sales_data.csv
+│   └── Dim_Date.cs_
+```
