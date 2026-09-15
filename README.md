@@ -2,7 +2,7 @@
 
 An interactive Power BI dashboard analyzing 128,949 Amazon India apparel orders (Q2 2022) to surface revenue trends, product performance, geographic demand, and order fulfillment health.
 
-![Dashboard Preview](screenshots/executive-overview.png)
+![Dashboard Preview](page-1-overview.png)
 *(Screenshot — add after building; see `/screenshots` folder)*
 
 ## Business Problem
